@@ -6,12 +6,6 @@
 uint32_t Step::_stepId = 0;
 IgorStalevskiyPathFinder::IgorStalevskiyPathFinder() = default;
 IgorStalevskiyPathFinder::~IgorStalevskiyPathFinder() = default;
-
-void IgorStalevskiyPathFinder::output(const char *outputFileName)
-{
-	std::cout << "TO DO output!" << std::endl;
-}
-
 void IgorStalevskiyPathFinder::init(const char* inputJasonFile) {
 	std::ifstream	input(inputJasonFile);
 	Json::Value		root;
@@ -104,22 +98,21 @@ void IgorStalevskiyPathFinder::stamp(Step &step)
 		step.addBox(*it);
 	step.addInfo();
 }
-
-bool IgorStalevskiyPathFinder::simpleLoader(Step const &step, std::list<Box>::iterator const &itBoxes) const {
+bool IgorStalevskiyPathFinder::simpleLoader(Step const &step, std::list<Box>::iterator &itBoxes) {
 	if (!step._shippedBox.size())
 		return true;
 
 	auto itStepBox = step._shippedBox.begin(), end = step._shippedBox.end();
 	do {
 		if (Box::isIntersect(*itBoxes, *itStepBox)) {
-			itBoxes->moveBox(*itStepBox, _myship._maxCarryingCapacity);
-			simpleLoader(step, itBoxes);
-		} else
+			if (!itBoxes->moveBox(*itStepBox, _myship._maxCarryingCapacity))
+				return false;
+		} else {
 			return true;
-	} while (!Box::isIntersect(*itBoxes, *itStepBox) || ++itStepBox != end);
+		}
+	} while (++itStepBox != end || !Box::isIntersect(*itBoxes, *itStepBox));
 	return false;
 }
-
 void IgorStalevskiyPathFinder::primitiveDelivery(const char* outputFileName)
 {
 	std::ofstream output(outputFileName);
@@ -181,11 +174,9 @@ void IgorStalevskiyPathFinder::primitiveDelivery(const char* outputFileName)
 
 	output << root;
 }
-
 void IgorStalevskiyPathFinder::core(const char *outputFileName)
 {
 	primitiveDelivery(outputFileName);
-
 }
 
 void IgorStalevskiyPathFinder::FindSolution(const char* inputJasonFile, const char* outputFileName)

@@ -9,8 +9,6 @@
 
 #include "IGalaxyPathFinder.h"
 
-#define DEFAULT_NAME_OUTPUT_FILE "outDataNoName.json"
-
 enum { X, Y, Z, W };
 
 typedef struct V3f
@@ -84,7 +82,10 @@ typedef struct V3i
 	{
 		return x < n || y < n || z < n;
 	}
-
+	bool operator<(V3i const &ref) const
+	{
+		return x < ref.x && y < ref.y && z < ref.z;
+	}
 	bool operator<=(int32_t n) const
 	{
 		return *this < n || *this == n;
@@ -143,9 +144,9 @@ struct Box
 		switch (0)
 		{
 			case X:
-				++(testBox._min.x) += ref._max.x;
-				++(testBox._max.x) += ref._max.x;
-				if (testBox._max.x < maxShipStor.x)
+				(testBox._min.x) += ref._max.x;
+				(testBox._max.x) += ref._max.x;
+				if (testBox._max < maxShipStor)
 				{
 					if (!Box::isIntersect(testBox, ref))
 					{
@@ -154,11 +155,12 @@ struct Box
 					}
 					else
 						testBox = *this;
-				}
+				} else
+					break;
 			case Y:
-				++(testBox._min.y) += ref._max.y;
-				++(testBox._max.y) += ref._max.y;
-				if (testBox._max.y < maxShipStor.y)
+				(testBox._min.y) += ref._max.y;
+				(testBox._max.y) += ref._max.y;
+				if (testBox._max < maxShipStor)
 				{
 					if (!Box::isIntersect(testBox, ref))
 					{
@@ -167,11 +169,12 @@ struct Box
 					}
 					else
 						testBox = *this;
-				}
+				} else
+					break;
 			case Z:
-				++(testBox._min.z) += ref._max.z;
-				++(testBox._max.z) += ref._max.z;
-				if (testBox._max.z < maxShipStor.z)
+				(testBox._min.z) += ref._max.z;
+				(testBox._max.z) += ref._max.z;
+				if (testBox._max < maxShipStor)
 				{
 					if (!Box::isIntersect(testBox, ref))
 					{
@@ -180,7 +183,8 @@ struct Box
 					}
 					else
 						testBox = *this;
-				}
+				} else
+					break;
 			default:
 				std::logic_error("It can't be true! AXIS ERROR!");
 		}
@@ -193,7 +197,6 @@ struct Box
 	Vector3i	_max;
 	float		_w;
 };
-
 
 struct Ship
 {
@@ -279,7 +282,6 @@ struct Step
 
 class IgorStalevskiyPathFinder : public IGalaxyPathFinder {
 private:
-	std::forward_list<Step>			_steps;
 	std::list<Box>					_boxesWork;
 	std::list<Box>					_boxesFalse;
 	std::map<int32_t, TargetPoint>	_targetPoints;
@@ -287,29 +289,21 @@ private:
 
 	IgorStalevskiyPathFinder(IgorStalevskiyPathFinder const &);
 	IgorStalevskiyPathFinder &operator=(IgorStalevskiyPathFinder const &);
-
 	void init(const char* inputJasonFile);
 	void core(const char *outputFileName);
-	void output(const char* outputFileName);
-
 	void initTargetBox(Json::Value const &root);
 	void initBase(std::list<TargetPoint> &parsingPoint);
 	void initDistanceToBase(std::list<TargetPoint> &parsingPoint);
 	void initBox(Json::Value const &root);
 	void initShip(Json::Value const &root);
-
 	void stamp(Step &step);
 	void checkingBox(Json::Value const &box);
-
 	void primitiveDelivery(const char* outputFileName);
-
 	bool simpleBoxChecker(Step const &step, std::list<Box>::iterator const &itBoxes) const;
-	bool simpleLoader(Step const &step, std::list<Box>::iterator const &itBoxes) const;
+	bool simpleLoader(Step const &step, std::list<Box>::iterator &itBoxes);
 public:
 	IgorStalevskiyPathFinder();
 	~IgorStalevskiyPathFinder();
-
-
 
 	void FindSolution(const char* inputJasonFile, const char* outputFileName) override;
 	const char* ShowCaptainName()  override { return "Igor Stalevskiy"; }

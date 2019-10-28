@@ -3,9 +3,9 @@
 	{
 		"maxCarryingCapacity":
 		{
-			"half_x": 607,
-			"half_y": 261,
-			"half_z": 248
+			"half_x": 100,
+			"half_y": 100,
+			"half_z": 100
 		},
 		"maxResourcesWeight": 175.75,
 		"maxCarryingWeight": 388.6400146484375,
