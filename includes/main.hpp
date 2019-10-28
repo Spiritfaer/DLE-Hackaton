@@ -1,0 +1,7 @@
+#ifndef DRAGONSLAKEENTERTAINMENTHACKATON_MAIN_HPP
+#define DRAGONSLAKEENTERTAINMENTHACKATON_MAIN_HPP
+
+#include "json.h"
+#include "json-forwards.h"
+
+#endif
